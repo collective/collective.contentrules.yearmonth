@@ -1,0 +1,118 @@
+import datetime
+from OFS.SimpleItem import SimpleItem
+
+from zope.interface import implements, Interface
+from zope.component import adapts
+from zope.formlib import form
+from zope import schema
+
+from plone.contentrules.rule.interfaces import IExecutable, IRuleElementData
+
+from plone.app.contentrules.browser.formhelper import AddForm, EditForm 
+from plone.app.vocabularies.catalog import SearchableTextSourceBinder
+from plone.app.form.widgets.uberselectionwidget import UberSelectionWidget
+
+from plone.app.contentrules.actions.move import IMoveAction as IOriginalMoveAction
+from plone.app.contentrules.actions.move import MoveActionExecutor as OriginalMoveActionExecutor
+
+from Products.CMFCore.utils import getToolByName
+from Products.CMFPlone import PloneMessageFactory as _
+
+
+class IMoveAction(Interface):
+    """Interface for the configurable aspects of a move action.
+    
+    We don't want to have a static target folder but a target folder inwhich contents will be stored
+    in subfolders YYYY/MM
+    """
+    
+    target_root_folder = schema.Choice(title=_(u"label_target_root_folder", default=u"Root target folder"),
+                                       description=_(u"help_target_root_folder", default=u"As a path relative to the portal root."),
+                                       required=True,
+                                       source=SearchableTextSourceBinder({'is_folderish' : True},
+                                                                         default_query='path:'))
+         
+class MoveAction(SimpleItem):
+    """The actual persistent implementation of the action element.
+    """
+    implements(IMoveAction, IOriginalMoveAction, IRuleElementData)
+    
+    target_root_folder = ''
+    element = 'collective.contentrules.yearmonth.actions.Move'
+
+    @property
+    def target_folder(self):
+        now = datetime.datetime.now()
+        year = str(now.year)
+        month = str(now.month)
+        return "%s/%s/%s" % (self.target_root_folder, year, month)
+    
+    @property
+    def summary(self):
+        return _(u"Move to folder ${folder}", mapping=dict(folder=self.target_folder))
+    
+class MoveActionExecutor(OriginalMoveActionExecutor):
+    """The executor for this action.
+    """
+    implements(IExecutable)
+    adapts(Interface, IMoveAction, Interface)
+         
+    def __init__(self, context, element, event):
+        super(MoveActionExecutor, self).__init__(context, element, event)
+        now = datetime.datetime.now()
+        year_id = str(now.year)
+        month_id = str(now.month)
+
+        portal_url = getToolByName(context, 'portal_url')
+        path = element.target_root_folder
+        if len(path) > 1 and path[0] == '/':
+            path = path[1:]
+
+        target = portal_url.getPortalObject().unrestrictedTraverse(str(path), None)
+        
+
+        if not target.hasObject(year_id):
+            year_id = self._invokeFactory(target, 'Folder', year_id)
+            year = getattr(target, year_id)
+            self._invokeFactory(year, 'Folder', month_id)
+        else:
+            year = getattr(target, year)
+            if not year.hasObject(month_id):
+                month_id = self._invokeFactory(year, 'Folder', month_id)
+
+    def _invokeFactory(self, context, type, id):
+        from AccessControl import SecurityManagement
+        from AccessControl import SpecialUsers
+        old_sm = SecurityManagement.getSecurityManager()
+        SecurityManagement.newSecurityManager(None, SpecialUsers.system)
+        try:
+            new_id = context.invokeFactory(type, id)
+        finally:
+            SecurityManagement.setSecurityManager(old_sm)
+        return new_id
+
+
+class MoveAddForm(AddForm):
+    """An add form for move-to-folder actions.
+    """
+    form_fields = form.FormFields(IMoveAction)
+    form_fields['target_root_folder'].custom_widget = UberSelectionWidget
+    label = _(u"Add Move Action")
+    description = _(u"A move action can move an object to a different folder/YYYY/MM.")
+    form_name = _(u"Configure element")
+
+    def create(self, data):
+        a = MoveAction()
+        form.applyChanges(a, self.form_fields, data)
+        return a
+
+class MoveEditForm(EditForm):
+    """An edit form for move rule actions.
+    
+    Formlib does all the magic here.
+    """
+    form_fields = form.FormFields(IMoveAction)
+    form_fields['target_root_folder'].custom_widget = UberSelectionWidget
+    label = _(u"Edit Move Action YYYY/MM")
+    description = _(u"A move action can move an object to a different folder/YYYY/MM.")
+    form_name = _(u"Configure element")

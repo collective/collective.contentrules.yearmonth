@@ -1,0 +1,33 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone">
+
+     <adapter factory=".move.MoveActionExecutor" />
+
+     <browser:page
+       for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+       name="collective.contentrules.yearmonth.actions.Move"
+       class=".move.MoveAddForm"
+       permission="cmf.ManagePortal"
+       />
+
+     <browser:page
+       for=".move.IMoveAction"
+       name="edit"
+       class=".move.MoveEditForm"
+       permission="cmf.ManagePortal"
+       />
+
+     <plone:ruleAction
+         name="collective.contentrules.yearmonth.actions.Move"
+         title="Move to folder/YYYY/MM"
+         description="Move the triggering item to a specific folder"
+         for="*"
+         event="zope.component.interfaces.IObjectEvent"
+         addview="collective.contentrules.yearmonth.actions.Move"
+         editview="edit"
+         schema=".move.IMoveAction"
+         factory=".move.MoveAction"
+         />
+</configure>
