@@ -3,6 +3,7 @@ from OFS.SimpleItem import SimpleItem
 
 from zope.interface import implements, Interface
 from zope.component import adapts
+from zope.component import getMultiAdapter
 from zope.formlib import form
 from zope import schema
 
@@ -12,10 +13,10 @@ from plone.app.contentrules.browser.formhelper import AddForm, EditForm
 from plone.app.vocabularies.catalog import SearchableTextSourceBinder
 from plone.app.form.widgets.uberselectionwidget import UberSelectionWidget
 
+from collective.contentrules.yearmonth.interfaces import ITargetFolder
 from plone.app.contentrules.actions.move import IMoveAction as IOriginalMoveAction
 from plone.app.contentrules.actions.move import MoveActionExecutor as OriginalMoveActionExecutor
 
-from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
 
 
@@ -59,37 +60,8 @@ class MoveActionExecutor(OriginalMoveActionExecutor):
          
     def __init__(self, context, element, event):
         super(MoveActionExecutor, self).__init__(context, element, event)
-        now = datetime.datetime.now()
-        year_id = str(now.year)
-        month_id = str(now.month)
+        getMultiAdapter((context, element), ITargetFolder).setup_target()
 
-        portal_url = getToolByName(context, 'portal_url')
-        path = element.target_root_folder
-        if len(path) > 1 and path[0] == '/':
-            path = path[1:]
-
-        target = portal_url.getPortalObject().unrestrictedTraverse(str(path), None)
-        
-
-        if not target.hasObject(year_id):
-            year_id = self._invokeFactory(target, 'Folder', year_id)
-            year = getattr(target, year_id)
-            self._invokeFactory(year, 'Folder', month_id)
-        else:
-            year = getattr(target, year)
-            if not year.hasObject(month_id):
-                month_id = self._invokeFactory(year, 'Folder', month_id)
-
-    def _invokeFactory(self, context, type, id):
-        from AccessControl import SecurityManagement
-        from AccessControl import SpecialUsers
-        old_sm = SecurityManagement.getSecurityManager()
-        SecurityManagement.newSecurityManager(None, SpecialUsers.system)
-        try:
-            new_id = context.invokeFactory(type, id)
-        finally:
-            SecurityManagement.setSecurityManager(old_sm)
-        return new_id
 
 
 class MoveAddForm(AddForm):
@@ -116,3 +88,4 @@ class MoveEditForm(EditForm):
     label = _(u"Edit Move Action YYYY/MM")
     description = _(u"A move action can move an object to a different folder/YYYY/MM.")
     form_name = _(u"Configure element")
+

@@ -7,6 +7,7 @@ from plone.contentrules.rule.interfaces import IExecutable
 
 from collective.contentrules.yearmonth.actions.move import MoveAction
 from collective.contentrules.yearmonth.actions.move import MoveEditForm
+from collective.contentrules.yearmonth.interfaces import ITargetFolder
 
 from plone.app.contentrules.rule import Rule
 
@@ -15,6 +16,11 @@ from plone.app.contentrules.tests.base import ContentRulesTestCase
 from zope.component.interfaces import IObjectEvent
 
 from Products.PloneTestCase.setup import default_user
+
+import datetime
+now = datetime.datetime.now()
+year = str(now.year)
+month = str(now.month)
 
 class DummyEvent(object):
     implements(IObjectEvent)
@@ -67,14 +73,21 @@ class TestMoveAction(ContentRulesTestCase):
         self.assertEquals(True, ex())
         
         self.failIf('d1' in self.folder.source.objectIds())
-        import datetime
-        now = datetime.datetime.now()
-        year = str(now.year)
-        month = str(now.month)
         self.failUnless(year in self.portal.target.objectIds())
 
         self.failUnless(month in self.portal.target[year].objectIds())
         self.failUnless('d1' in self.portal.target[year][month].objectIds())
+
+    def testTargetFolder(self):
+        target_root = self.portal.target
+        self.failIf(year in target_root.objectIds())
+
+        e = MoveAction()
+        e.target_root_folder = '/target'
+        target_adapter = getMultiAdapter((self.folder.source.d1, e), ITargetFolder)
+        target = target_adapter.setup_target()
+        
+        self.failUnless("/target/%s/%s" % (year, month) in target.absolute_url())
         
 #    def testExecuteWithError(self): 
 #        e = MoveAction()
