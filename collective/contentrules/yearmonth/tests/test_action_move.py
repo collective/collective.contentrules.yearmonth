@@ -117,7 +117,7 @@ class TestMoveAction(ContentRulesTestCase):
 #        year = str(now.year)
 #        month = str(now.month)
 #        self.failIf('d1' in self.portal.target[year][month].objectIds())
-        
+#        
 #    def testExecuteWithoutPermissionsOnTarget(self):
 #        self.setRoles(('Member',))
 #        
