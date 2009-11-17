@@ -11,7 +11,6 @@ from collective.contentrules.yearmonth.actions.move import IMoveAction
 from collective.contentrules.yearmonth.interfaces import ITargetFolder
 
 
-
 class TargetFolder(object):
     """ Default implementation of ITargetFolder """
     implements(ITargetFolder)
@@ -27,7 +26,8 @@ class TargetFolder(object):
         year_id = str(now.year)
         month_id = str(now.month)
 
-        portal = getMultiAdapter((self.context, self.context.REQUEST), name=u'plone_portal_state').portal()
+        portal = getMultiAdapter((self.context, self.context.REQUEST),
+                                 name=u'plone_portal_state').portal()
         path = self.action.target_root_folder
         if len(path) > 1 and path[0] == '/':
             path = path[1:]
@@ -55,4 +55,3 @@ class TargetFolder(object):
         finally:
             SecurityManagement.setSecurityManager(old_sm)
         return new_id
-

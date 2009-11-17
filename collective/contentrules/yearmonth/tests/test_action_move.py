@@ -18,15 +18,19 @@ from zope.component.interfaces import IObjectEvent
 from Products.PloneTestCase.setup import default_user
 
 import datetime
+
+
 now = datetime.datetime.now()
 year = str(now.year)
 month = str(now.month)
 
+
 class DummyEvent(object):
     implements(IObjectEvent)
-    
+
     def __init__(self, object):
         self.object = object
+
 
 class TestMoveAction(ContentRulesTestCase):
 
@@ -37,41 +41,50 @@ class TestMoveAction(ContentRulesTestCase):
         self.login(default_user)
         self.folder.source.invokeFactory('Document', 'd1')
 
-    def testRegistered(self): 
-        element = getUtility(IRuleAction, name='collective.contentrules.yearmonth.actions.Move')
-        self.assertEquals('collective.contentrules.yearmonth.actions.Move', element.addview)
+    def testRegistered(self):
+        element = getUtility(IRuleAction,
+                         name='collective.contentrules.yearmonth.actions.Move')
+        self.assertEquals('collective.contentrules.yearmonth.actions.Move',
+                          element.addview)
         self.assertEquals('edit', element.editview)
         self.assertEquals(None, element.for_)
         self.assertEquals(IObjectEvent, element.event)
-    
-    def testInvokeAddView(self): 
-        element = getUtility(IRuleAction, name='collective.contentrules.yearmonth.actions.Move')
+
+    def testInvokeAddView(self):
+        element = getUtility(IRuleAction,
+                         name='collective.contentrules.yearmonth.actions.Move')
         storage = getUtility(IRuleStorage)
         storage[u'foo'] = Rule()
         rule = self.portal.restrictedTraverse('++rule++foo')
-        
         adding = getMultiAdapter((rule, self.portal.REQUEST), name='+action')
-        addview = getMultiAdapter((adding, self.portal.REQUEST), name=element.addview)
-        
-        addview.createAndAdd(data={'target_root_folder' : '/target',})
-        
+
+        addview = getMultiAdapter((adding, self.portal.REQUEST),
+                                  name=element.addview)
+
+        addview.createAndAdd(data={'target_root_folder': '/target', })
+
         e = rule.actions[0]
         self.failUnless(isinstance(e, MoveAction))
         self.assertEquals('/target', e.target_root_folder)
-    
-    def testInvokeEditView(self): 
-        element = getUtility(IRuleAction, name='collective.contentrules.yearmonth.actions.Move')
+
+    def testInvokeEditView(self):
+        element = getUtility(IRuleAction,
+                         name='collective.contentrules.yearmonth.actions.Move')
         e = MoveAction()
-        editview = getMultiAdapter((e, self.folder.source.REQUEST), name=element.editview)
+        editview = getMultiAdapter((e, self.folder.source.REQUEST),
+                                   name=element.editview)
         self.failUnless(isinstance(editview, MoveEditForm))
 
-    def testExecute(self): 
+    def testExecute(self):
         e = MoveAction()
         e.target_root_folder = '/target'
-        
-        ex = getMultiAdapter((self.folder.source, e, DummyEvent(self.folder.source.d1)), IExecutable)
+
+        ex = getMultiAdapter((self.folder.source,
+                              e,
+                              DummyEvent(self.folder.source.d1)),
+                             IExecutable)
         self.assertEquals(True, ex())
-        
+
         self.failIf('d1' in self.folder.source.objectIds())
         self.failUnless(year in self.portal.target.objectIds())
 
@@ -84,11 +97,13 @@ class TestMoveAction(ContentRulesTestCase):
 
         e = MoveAction()
         e.target_root_folder = '/target'
-        target_adapter = getMultiAdapter((self.folder.source.d1, e), ITargetFolder)
+        target_adapter = getMultiAdapter((self.folder.source.d1, e),
+                                         ITargetFolder)
         target = target_adapter.setup_target()
-        
-        self.failUnless("/target/%s/%s" % (year, month) in target.absolute_url())
-        
+
+        self.failUnless("/target/%s/%s" % (year, month) in
+                        target.absolute_url())
+
 #    def testExecuteWithError(self): 
 #        e = MoveAction()
 #        e.target_root_folder = '/dummy'
@@ -160,7 +175,8 @@ class TestMoveAction(ContentRulesTestCase):
 #        self.failIf('d1' in self.folder.objectIds())
 #        self.failUnless('d1' in self.folder.target.objectIds())
 #        self.failUnless('d1.1' in self.folder.target.objectIds())
-        
+
+
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
