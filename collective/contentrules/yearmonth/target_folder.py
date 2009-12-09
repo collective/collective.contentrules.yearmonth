@@ -40,7 +40,7 @@ class TargetFolder(object):
             self._invokeFactory(year, 'Folder', month_id)
             return getattr(year, month_id)
         else:
-            year = getattr(target_root, year)
+            year = getattr(target_root, year_id)
             if not year.hasObject(month_id):
                 month_id = self._invokeFactory(year, 'Folder', month_id)
                 return getattr(year, month_id)
@@ -51,7 +51,7 @@ class TargetFolder(object):
         old_sm = SecurityManagement.getSecurityManager()
         SecurityManagement.newSecurityManager(None, SpecialUsers.system)
         try:
-            new_id = context.invokeFactory(type, id)
+            new_id = context.invokeFactory(type, id=id, title=id)
         finally:
             SecurityManagement.setSecurityManager(old_sm)
         return new_id
