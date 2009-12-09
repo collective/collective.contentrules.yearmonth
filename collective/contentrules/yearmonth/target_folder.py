@@ -47,11 +47,11 @@ class TargetFolder(object):
 
         return None
 
-    def _invokeFactory(self, context, type, id):
+    def _invokeFactory(self, context, type, id, title=''):
         old_sm = SecurityManagement.getSecurityManager()
         SecurityManagement.newSecurityManager(None, SpecialUsers.system)
         try:
-            new_id = context.invokeFactory(type, id=id, title=id)
+            new_id = context.invokeFactory(type, id=id, title=title)
         finally:
             SecurityManagement.setSecurityManager(old_sm)
         return new_id
