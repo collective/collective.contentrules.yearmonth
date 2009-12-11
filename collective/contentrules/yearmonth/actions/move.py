@@ -71,7 +71,7 @@ class MoveActionExecutor(OriginalMoveActionExecutor):
 
     def __init__(self, context, element, event):
         super(MoveActionExecutor, self).__init__(context, element, event)
-        getMultiAdapter((context, element), ITargetFolder).setup_target()
+        getMultiAdapter((event.object, element), ITargetFolder).setup_target()
 
 
 class MoveAddForm(AddForm):
