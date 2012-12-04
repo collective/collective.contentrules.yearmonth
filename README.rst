@@ -6,12 +6,15 @@ You are able to choose a root destination target folder and once applied the ele
 Year and month folders depend on the rule execution date and they are automatically added if not existent.
 You can provide a different target folder writing your own adapter and move contents in different dynamic target folders.
 
-Credits
--------
 
-* Davide Moro <davide.moro@redomino.com>
+Credits and contributions
+=========================
 
-Copyright
----------
+* `Redomino <http://redomino.com/en>`_
+* `Makina Corpus <http://www.makina-corpus.com>`_
 
-Redomino
+Contributors
+============
+
+* JeanMichel FRANCOIS [toutpt]
+* Davide Moro [davideilmoro]
