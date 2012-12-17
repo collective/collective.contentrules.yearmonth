@@ -4,7 +4,8 @@ Changelog
 1.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Add transitions and folderish_type options to the add/edit form.
+  [toutpt]
 
 
 1.0 (2012-12-04)

@@ -27,6 +27,7 @@ setup(name='collective.contentrules.yearmonth',
       zip_safe=False,
       install_requires=[
           'setuptools',
+          'plone.api',
           # -*- Extra requirements: -*-
       ],
       entry_points="""

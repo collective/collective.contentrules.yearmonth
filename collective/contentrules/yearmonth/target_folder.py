@@ -7,6 +7,8 @@ from zope.interface import implements
 from zope.component import adapts
 from zope.component import getMultiAdapter
 
+from plone import api
+
 from collective.contentrules.yearmonth.actions.move import IMoveAction
 from collective.contentrules.yearmonth.interfaces import ITargetFolder
 
@@ -35,23 +37,28 @@ class TargetFolder(object):
         target_root = portal.unrestrictedTraverse(str(path), None)
 
         if not target_root.hasObject(year_id):
-            year_id = self._invokeFactory(target_root, 'Folder', year_id)
-            year = getattr(target_root, year_id)
-            self._invokeFactory(year, 'Folder', month_id)
-            return getattr(year, month_id)
+            year = self.create_folder(target_root, year_id)
         else:
             year = getattr(target_root, year_id)
-            if not year.hasObject(month_id):
-                month_id = self._invokeFactory(year, 'Folder', month_id)
-                return getattr(year, month_id)
 
-        return None
+        if not year.hasObject(month_id):
+            month = self.create_folder(year, month_id)
+        else:
+            month = getattr(year, month_id)
 
-    def _invokeFactory(self, context, type, id, title=''):
+        return month
+
+    def create_folder(self, context, id, title=''):
         old_sm = SecurityManagement.getSecurityManager()
         SecurityManagement.newSecurityManager(None, SpecialUsers.system)
         try:
-            new_id = context.invokeFactory(type, id=id, title=title)
+            folder = api.content.create(type=self.action.folderish_type,
+                                        id=id,
+                                        title=title,
+                                        container=context)
+            for transition in self.action.transitions:
+                api.content.transition(obj=folder,
+                                       transition=transition)
         finally:
             SecurityManagement.setSecurityManager(old_sm)
-        return new_id
+        return folder

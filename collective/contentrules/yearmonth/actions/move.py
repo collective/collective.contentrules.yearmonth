@@ -21,6 +21,8 @@ from plone.app.contentrules.actions.move import MoveActionExecutor as \
 
 from Products.CMFPlone import PloneMessageFactory as _
 
+TYPES_VOCABULARY = "plone.app.vocabularies.ReallyUserFriendlyTypes"
+TRANSITIONS_VOCABULARY = "plone.app.vocabularies.WorkflowTransitions"
 
 class IMoveAction(Interface):
     """
@@ -41,6 +43,16 @@ class IMoveAction(Interface):
                                                       {'is_folderish': True},
                                                       default_query='path:'))
 
+    folderish_type = schema.Choice(title=_(u"Type used to create folder"),
+                                   default="Folder",
+                                   required=True,
+                                   vocabulary=TYPES_VOCABULARY)
+
+    transitions = schema.List(title=_(u"Transitions to execute"),
+                              value_type=schema.Choice(title=_(u"Transition"),
+                                       vocabulary=TRANSITIONS_VOCABULARY),
+                              default=["publish"],
+                              required=False)
 
 class MoveAction(SimpleItem):
     """The actual persistent implementation of the action element.
@@ -48,6 +60,8 @@ class MoveAction(SimpleItem):
     implements(IMoveAction, IOriginalMoveAction, IRuleElementData)
 
     target_root_folder = ''
+    folderish_type = 'Folder'
+    transitions = ['publish']
     element = 'collective.contentrules.yearmonth.actions.Move'
 
     @property
