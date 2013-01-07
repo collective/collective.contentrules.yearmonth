@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from OFS.SimpleItem import SimpleItem
 
 from zope.interface import implements, Interface
@@ -23,6 +23,7 @@ from Products.CMFPlone import PloneMessageFactory as _
 
 TYPES_VOCABULARY = "plone.app.vocabularies.ReallyUserFriendlyTypes"
 TRANSITIONS_VOCABULARY = "plone.app.vocabularies.WorkflowTransitions"
+
 
 class IMoveAction(Interface):
     """
@@ -54,6 +55,7 @@ class IMoveAction(Interface):
                               default=["publish"],
                               required=False)
 
+
 class MoveAction(SimpleItem):
     """The actual persistent implementation of the action element.
     """
@@ -66,10 +68,8 @@ class MoveAction(SimpleItem):
 
     @property
     def target_folder(self):
-        now = datetime.datetime.now()
-        year = str(now.year)
-        month = str(now.month)
-        return "%s/%s/%s" % (self.target_root_folder, year, month)
+        now = datetime.now()
+        return "%s/%s" % (self.target_root_folder, now.strftime('%Y/%m'))
 
     @property
     def summary(self):

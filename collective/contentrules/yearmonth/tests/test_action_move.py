@@ -1,28 +1,22 @@
+from datetime import datetime
+
 from zope.interface import implements
 from zope.component import getUtility, getMultiAdapter
+from zope.component.interfaces import IObjectEvent
 
 from plone.contentrules.engine.interfaces import IRuleStorage
 from plone.contentrules.rule.interfaces import IRuleAction
 from plone.contentrules.rule.interfaces import IExecutable
+from plone.app.contentrules.rule import Rule
+from plone.app.contentrules.tests.base import ContentRulesTestCase
+from Products.PloneTestCase.setup import default_user
 
 from collective.contentrules.yearmonth.actions.move import MoveAction
 from collective.contentrules.yearmonth.actions.move import MoveEditForm
 from collective.contentrules.yearmonth.interfaces import ITargetFolder
 
-from plone.app.contentrules.rule import Rule
-
-from plone.app.contentrules.tests.base import ContentRulesTestCase
-
-from zope.component.interfaces import IObjectEvent
-
-from Products.PloneTestCase.setup import default_user
-
-import datetime
-
-
-now = datetime.datetime.now()
-year = str(now.year)
-month = str(now.month)
+now = datetime.now()
+year, month = now.strftime('%Y/%m').split('/')
 
 
 class DummyEvent(object):

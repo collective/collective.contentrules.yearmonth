@@ -6,7 +6,8 @@ Changelog
 
 - Add transitions and folderish_type options to the add/edit form.
   [toutpt]
-
+- Fix issue with year/month when month < 10 should be 2013/01 and not 2013/1
+  [toutpt]
 
 1.0 (2012-12-04)
 ----------------

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from AccessControl import SecurityManagement
 from AccessControl import SpecialUsers
 
@@ -24,9 +24,8 @@ class TargetFolder(object):
 
     def setup_target(self):
         """ """
-        now = datetime.datetime.now()
-        year_id = str(now.year)
-        month_id = str(now.month)
+        now = datetime.now()
+        year_id, month_id = now.strftime('%Y/%m').split('/')
 
         portal = getMultiAdapter((self.context, self.context.REQUEST),
                                  name=u'plone_portal_state').portal()
