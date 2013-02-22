@@ -17,4 +17,4 @@ Contributors
 ============
 
 * JeanMichel FRANCOIS [toutpt]
-* Davide Moro [davideilmoro]
+* Davide Moro [davidemoro]
